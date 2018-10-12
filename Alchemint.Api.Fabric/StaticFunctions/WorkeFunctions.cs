@@ -64,7 +64,6 @@ namespace Sam.Api
                 {
                     _logFact.AddConsole();
                     //_logFact.AddDebug();
-
                     return _logFact;
                 }
 
