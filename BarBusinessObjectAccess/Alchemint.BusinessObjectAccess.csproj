@@ -1,0 +1,16 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netstandard2.0</TargetFramework>
+    <RootNamespace>Alchemint.Core</RootNamespace>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\BarAccessSQLite\Alchemint.Data.SQLite.csproj" />
+    <ProjectReference Include="..\BarClasses\BarClasses.csproj" />
+    <ProjectReference Include="..\BarDataAccessInterfaces\Alchemint.DataAccess.Interfaces.csproj" />
+    <ProjectReference Include="..\BarDataAccessSqlServer\Alchemint.Data.SQLServer.csproj" />
+    <ProjectReference Include="..\BarDatabaseCreationScripts\Alchemint.DataAccess.csproj" />
+  </ItemGroup>
+
+</Project>

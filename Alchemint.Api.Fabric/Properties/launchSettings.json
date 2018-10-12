@@ -1,0 +1,36 @@
+{
+  "iisSettings": {
+    "windowsAuthentication": false,
+    "anonymousAuthentication": true,
+    "iisExpress": {
+      "applicationUrl": "http://localhost:50749",
+      "sslPort": 44329
+    }
+  },
+  "$schema": "http://json.schemastore.org/launchsettings.json",
+  "profiles": {
+    "IIS Express": {
+      "commandName": "IISExpress",
+      "launchBrowser": true,
+      "launchUrl": "api/fabric/33c35730-2deb-44ae-9a16-1dec27960052/BarUser/All",
+      "environmentVariables": {
+        "ASPNETCORE_ENVIRONMENT": "Development"
+      }
+    },
+    "Alchemint.Api.Fabric": {
+      "commandName": "Project",
+      "launchBrowser": true,
+      "launchUrl": "api/fabric/33c35730-2deb-44ae-9a16-1dec27960052/BarUser/All",
+      "environmentVariables": {
+        "ASPNETCORE_ENVIRONMENT": "Development"
+      },
+      "applicationUrl": "https://localhost:5001;http://localhost:5000"
+    },
+    "Docker": {
+      "commandName": "Docker",
+      "launchBrowser": true,
+      "launchUrl": "{Scheme}://{ServiceHost}:{ServicePort}/api/fabric/33c35730-2deb-44ae-9a16-1dec27960052/BarUser/All"
+    }
+  }
+}
+
