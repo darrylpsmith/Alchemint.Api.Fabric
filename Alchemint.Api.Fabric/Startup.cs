@@ -59,7 +59,8 @@ namespace Sam.Api
 
             if (Configuration["Connection:DBtype"] == "SQLITE")
             {
-                string path = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
+                //string path = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
+                string path = Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData);
                 conn = Configuration["Connection:ConnStringSQLite"].Replace("@APPDATA@", path);
                 if (Directory.Exists(conn) == false)
                 {
@@ -67,7 +68,7 @@ namespace Sam.Api
                 }
 
                 conn = conn.Replace('\\', '/');
-                conn += "SAMBACKEND.sqlite";
+                conn += "SAMBACKEND5.sqlite";
 
                 WorkeFunctions.SetConnectInformation(
                     DatabaseType.SQLite, 

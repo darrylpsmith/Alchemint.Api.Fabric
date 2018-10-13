@@ -5,14 +5,20 @@ EXPOSE 443
 
 FROM microsoft/dotnet:2.1-sdk AS build
 WORKDIR /src
-COPY ["Alchemint.Api.Fabric/Alchemint.Api.Fabric.csproj", "Alchemint.Api.Fabric/"]
-RUN dotnet restore "Alchemint.Api.Fabric/Alchemint.Api.Fabric.csproj"
+COPY Alchemint.Api.Fabric/Alchemint.Api.Fabric.csproj Alchemint.Api.Fabric/
+COPY BarCore/Alchemint.Core.csproj BarCore/
+COPY BarAccessSQLite/Alchemint.Data.SQLite.csproj BarAccessSQLite/
+COPY BarDataAccessInterfaces/Alchemint.DataAccess.Interfaces.csproj BarDataAccessInterfaces/
+COPY BarBusinessObjectAccess/Alchemint.BusinessObjectAccess.csproj BarBusinessObjectAccess/
+COPY BarDataAccessSqlServer/Alchemint.Data.SQLServer.csproj BarDataAccessSqlServer/
+COPY BarClasses/BarClasses.csproj BarClasses/
+RUN dotnet restore Alchemint.Api.Fabric/Alchemint.Api.Fabric.csproj
 COPY . .
-WORKDIR "/src/Alchemint.Api.Fabric"
-RUN dotnet build "Alchemint.Api.Fabric.csproj" -c Release -o /app
+WORKDIR /src/Alchemint.Api.Fabric
+RUN dotnet build Alchemint.Api.Fabric.csproj -c Release -o /app
 
 FROM build AS publish
-RUN dotnet publish "Alchemint.Api.Fabric.csproj" -c Release -o /app
+RUN dotnet publish Alchemint.Api.Fabric.csproj -c Release -o /app
 
 FROM base AS final
 WORKDIR /app

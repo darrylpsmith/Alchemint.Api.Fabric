@@ -85,7 +85,8 @@ namespace Sam.Api.Controllers
         private void BusinessObjectAccess_sqlStatementExecuted(string Sql, List<ISQLDMLStatementVariable> Variables)
         {
             Logger.LogInformation(Sql);
-            Logger.LogInformation(Variables.ToString());
+            if (Variables != null)
+                Logger.LogInformation(Variables.ToString());
             
         }
 
