@@ -6,9 +6,9 @@ EXPOSE 443
 FROM microsoft/dotnet:2.1-sdk AS build
 WORKDIR /src
 COPY ["Alchemint.Api.Fabric/Alchemint.Api.Fabric.csproj", "Alchemint.Api.Fabric/"]
+COPY ["BarCore/Alchemint.Core.csproj", "BarCore/"]
 COPY ["BarAccessSQLite/Alchemint.Data.SQLite.csproj", "BarAccessSQLite/"]
 COPY ["BarDataAccessInterfaces/Alchemint.DataAccess.Interfaces.csproj", "BarDataAccessInterfaces/"]
-COPY ["Alchemint.Core/Alchemint.Core.csproj", "Alchemint.Core/"]
 COPY ["BarDatabaseCreationScripts/Alchemint.DataAccess.csproj", "BarDatabaseCreationScripts/"]
 COPY ["BarBusinessObjectAccess/Alchemint.BusinessObjectAccess.csproj", "BarBusinessObjectAccess/"]
 COPY ["BarDataAccessSqlServer/Alchemint.Data.SQLServer.csproj", "BarDataAccessSqlServer/"]

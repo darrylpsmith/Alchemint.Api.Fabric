@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace Alchemint.Core.Fabric
+namespace Alchemint.Core
 {
     public class EntitySearchObject
     {

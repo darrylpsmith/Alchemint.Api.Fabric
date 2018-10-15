@@ -22,10 +22,10 @@
     <ProjectReference Include="..\BarAccessSQLite\Alchemint.Data.SQLite.csproj" />
     <ProjectReference Include="..\BarBusinessObjectAccess\Alchemint.BusinessObjectAccess.csproj" />
     <ProjectReference Include="..\BarClasses\BarClasses.csproj" />
-    <ProjectReference Include="..\BarCore\Alchemint.Core.csproj" />
     <ProjectReference Include="..\BarDataAccessInterfaces\Alchemint.DataAccess.Interfaces.csproj" />
     <ProjectReference Include="..\BarDataAccessSqlServer\Alchemint.Data.SQLServer.csproj" />
     <ProjectReference Include="..\BarDatabaseCreationScripts\Alchemint.DataAccess.csproj" />
+    <ProjectReference Include="..\Sam.DataModel\Sam.DataModel.csproj" />
   </ItemGroup>
 
 </Project>

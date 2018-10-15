@@ -5,8 +5,8 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Folder Include="DataEntityAbstraction\" />
-    <Folder Include="Statics\" />
+    <Compile Remove="BarJsonAccess.cs" />
+    <Compile Remove="IBarJsonAccess.cs" />
   </ItemGroup>
 
   <ItemGroup>
@@ -15,8 +15,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\Alchemint.Core\Alchemint.Core.csproj" />
-    <ProjectReference Include="..\BarDataAccessInterfaces\Alchemint.DataAccess.Interfaces.csproj" />
+    <ProjectReference Include="..\BarClasses\BarClasses.csproj" />
   </ItemGroup>
 
 </Project>

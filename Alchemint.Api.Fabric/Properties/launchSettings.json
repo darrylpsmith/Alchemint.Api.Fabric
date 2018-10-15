@@ -12,7 +12,8 @@
     "IIS Express": {
       "commandName": "IISExpress",
       "launchBrowser": true,
-      "launchUrl": "api/fabric/33c35730-2deb-44ae-9a16-1dec27960052/BarUser/All",
+      // "launchUrl": "api/fabric/33c35730-2deb-44ae-9a16-1dec27960052/BarUser/All",
+      "launchUrl": "api/fabric/33c35730-2deb-44ae-9a16-1dec27960052/Party/All",
       "environmentVariables": {
         "ASPNETCORE_ENVIRONMENT": "Development"
       }
@@ -20,7 +21,8 @@
     "Alchemint.Api.Fabric": {
       "commandName": "Project",
       "launchBrowser": true,
-      "launchUrl": "api/fabric/33c35730-2deb-44ae-9a16-1dec27960052/BarUser/All",
+      //"launchUrl": "api/fabric/33c35730-2deb-44ae-9a16-1dec27960052/BarUser/All",
+      "launchUrl": "api/fabric/33c35730-2deb-44ae-9a16-1dec27960052/Party/All",
       "environmentVariables": {
         "ASPNETCORE_ENVIRONMENT": "Development"
       },
@@ -29,7 +31,8 @@
     "Docker": {
       "commandName": "Docker",
       "launchBrowser": true,
-      "launchUrl": "{Scheme}://{ServiceHost}:{ServicePort}/api/fabric/33c35730-2deb-44ae-9a16-1dec27960052/BarUser/All"
+      //"launchUrl": "{Scheme}://{ServiceHost}:{ServicePort}/api/fabric/33c35730-2deb-44ae-9a16-1dec27960052/BarUser/All",
+      "launchUrl": "{Scheme}://{ServiceHost}:{ServicePort}/api/fabric/33c35730-2deb-44ae-9a16-1dec27960052/Party/All"
     }
   }
 }
