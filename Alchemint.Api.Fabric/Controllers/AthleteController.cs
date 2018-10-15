@@ -12,17 +12,26 @@ using Sam.Api;
 
 namespace Sam.Api.Controllers
 {
-    [Route("api/[controller]")]
+    //[Route("api/[controller]")]
+    [Route("api/sam")]
     [ApiController]
     public class AthleteController : ControllerBase
     {
         FabricController _fab = new FabricController();
 
-        [HttpGet("{ApiKey}", Name = "GetAthlete")]
+        [HttpGet("athlete/{ApiKey}", Name = "GetAthlete")]
         public ActionResult<dynamic> Get(string ApiKey, [FromQuery]string UniqueKeyQuery)
         {
-            return _fab.Get(ApiKey, "SAMAthlete", UniqueKeyQuery);
+            return _fab.Get(ApiKey, "Party", UniqueKeyQuery);
         }
+
+
+        [HttpGet("contract/{ApiKey}", Name = "GetContract")]
+        public ActionResult<dynamic> GetContract(string ApiKey, [FromQuery]string UniqueKeyQuery)
+        {
+            return _fab.Get(ApiKey, "LegalContract", UniqueKeyQuery);
+        }
+
     }
 
 }
