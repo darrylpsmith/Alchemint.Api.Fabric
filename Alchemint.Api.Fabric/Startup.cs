@@ -19,6 +19,10 @@ namespace Sam.Api
 {
     public class Startup
     {
+
+        ILogger Logger { get; } =
+            WorkeFunctions.ApplicationLogging.CreateLogger<Startup>();
+
         public Startup(IConfiguration configuration)
         {
             Configuration = configuration;
@@ -54,7 +58,13 @@ namespace Sam.Api
             var myConfig = Configuration["Connection"];
             app.UseHttpsRedirection();
             app.UseMvc();
-            
+
+
+            if (env.IsDevelopment())
+            {
+                Logger.LogInformation($"DBTYPE : {Configuration["Connection:DBtype"]}");
+            }
+
             string conn = "";
 
             if (Configuration["Connection:DBtype"] == "SQLITE")
@@ -69,6 +79,11 @@ namespace Sam.Api
 
                 conn = conn.Replace('\\', '/');
                 conn += "SAMBACKEND5.sqlite";
+
+                if (env.IsDevelopment())
+                {
+                    Logger.LogInformation($"DBFILE : {conn}");
+                }
 
                 WorkeFunctions.SetConnectInformation(
                     DatabaseType.SQLite, 
@@ -106,8 +121,26 @@ namespace Sam.Api
                     Configuration["DatabaseTenant:Name"]);
 
             }
+            else if (Configuration["Connection:DBtype"] == "MYSQL")
+            {
+                conn = Configuration["Connection:ConnStringMySQL"];
 
+                WorkeFunctions.SetConnectInformation(
+                    DatabaseType.SQLExpress,
+                    conn,
+                    Configuration["DatabaseTenant:Code"],
+                    Configuration["DatabaseTenant:Name"]);
 
+            }
+            else
+            {
+                throw new Exception("CONFIG ERROR: UNKNOWN DBTYPE");
+            }
+
+            if (conn.Trim().Length <= 0)
+            {
+                throw new Exception("CONFIG ERROR: CONNECTION");
+            }
 
         }
     }

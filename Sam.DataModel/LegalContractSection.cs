@@ -12,8 +12,8 @@ namespace Sam.DataModel
         }
         [PrimaryKey]
         public string Id { get; set; }
-        [UniqueKey]
         public string Name { get; set; }
         public int PositionInContract { get; set; }
+        public string Content { get; set; }
     }
 }

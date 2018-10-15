@@ -16,7 +16,7 @@ namespace Sam.Api.Controllers
     [ApiController]
     public class AthleteController : ControllerBase
     {
-        BarFabricController _fab = new BarFabricController();
+        FabricController _fab = new FabricController();
 
         [HttpGet("{ApiKey}", Name = "GetAthlete")]
         public ActionResult<dynamic> Get(string ApiKey, [FromQuery]string UniqueKeyQuery)

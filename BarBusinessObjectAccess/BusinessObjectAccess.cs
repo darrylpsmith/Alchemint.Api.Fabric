@@ -66,7 +66,11 @@ namespace Alchemint.Core
                 }
                 else if (_barDatabaseAccess.DoesEntityWithSameUniqueKeyExist(Entity) == true)
                 {
-                    return CreateEntityResult.EntityRecordExists;
+                    return CreateEntityResult.EntityWithUniqueKeyRecordExists;
+                }
+                else if (_barDatabaseAccess.DoesEntityWithSamePrimaryKeyExist(Entity) == true)
+                {
+                    return CreateEntityResult.EntityWithPrimaryKeyRecordExists;
                 }
                 else
                 {
@@ -88,13 +92,12 @@ namespace Alchemint.Core
                 {
                     _barDatabaseAccess.CreateEntityStorageMechanism(Entity);
                 }
-                    
-                //return DeleteEntityResult.EntityStorageStructureMissing;
-                //else
-                //{
-                    _barDatabaseAccess.DeleteEntity(Entity);
+
+                var rowsAffected = _barDatabaseAccess.DeleteEntity(Entity);
+                if (rowsAffected <= 0)
+                    return DeleteEntityResult.NoRowsAffected;
+                else
                     return DeleteEntityResult.Success;
-                //}
             }
             catch (Exception ex)
             {
@@ -110,13 +113,11 @@ namespace Alchemint.Core
                 {
                     _barDatabaseAccess.CreateEntityStorageMechanism(Entity);
                 }
-
-                //return UpdateEntityResult.EntityStorageStructureMissing;
-                //else
-                //{
-                _barDatabaseAccess.UpdateEntity(Entity);
-                return UpdateEntityResult.Success;
-                //}
+                var rowsAffected = _barDatabaseAccess.UpdateEntity(Entity);
+                if (rowsAffected <=0)
+                    return UpdateEntityResult.NoRowsAffected;
+                else
+                    return UpdateEntityResult.Success;
             }
             catch (Exception ex)
             {
@@ -124,42 +125,49 @@ namespace Alchemint.Core
             }
         }
 
-        public object GetEntity(object Entity, List<string> propertiesToUseInFilter)
+        public object GetEntity(string EntityType, string Query)
         {
+            EntitySearchObject search = null;
             try
             {
-                if (_barDatabaseAccess.TableExists(Entity.GetType().Name) == false)
+                search = EntityFactory.GetSearchEntity(EntityType, Query);
+
+                if (_barDatabaseAccess.TableExists(EntityType) == false)
                 {
-                    _barDatabaseAccess.CreateEntityStorageMechanism(Entity);
+                    _barDatabaseAccess.CreateEntityStorageMechanism(search.TypedObject);
                 }
 
-                DataTable results = (DataTable) _barDatabaseAccess.GetEntity(Entity, propertiesToUseInFilter);
-                object outputObject = results.DataSetRowToBarBusinessObject(Entity.GetType());
+                DataTable results = (DataTable) _barDatabaseAccess.GetEntity(search.TypedObject, search.PropertiesToSearch);
+                object outputObject = results.DataSetRowToBarBusinessObject(search.TypedObject.GetType());
                 return outputObject;
                 
             }
             catch (Exception ex)
             {
-                throw new RecordRetrieveException($"Retrieve of Entity Type Failed: Type {Entity} : Object : " + ObjectToJson(Entity), ex);
+                throw new RecordRetrieveException($"Retrieve of Entity Type Failed: Type {EntityType} : Object : " + ObjectToJson(search.TypedObject), ex);
             }
         }
 
-        public List<object> GetEntities(object Entity, List<string> propertiesToUseInFilter)
+        public List<object> GetEntities(string EntityType, string Query)
         {
+
+            EntitySearchObject search = null;
             try
             {
-                if (_barDatabaseAccess.TableExists(Entity.GetType().Name) == false)
+                search = EntityFactory.GetSearchEntity(EntityType, Query);
+
+                if (_barDatabaseAccess.TableExists(EntityType) == false)
                 {
-                    _barDatabaseAccess.CreateEntityStorageMechanism(Entity);
+                    _barDatabaseAccess.CreateEntityStorageMechanism(search.TypedObject);
                 }
 
-                DataTable results = (DataTable)_barDatabaseAccess.GetEntities(Entity, propertiesToUseInFilter);
-                List<object> outputObject = results.DataSetToBarBusinessObjectList(Entity.GetType());
+                DataTable results = (DataTable)_barDatabaseAccess.GetEntities(search.TypedObject, search.PropertiesToSearch);
+                List<object> outputObject = results.DataSetToBarBusinessObjectList(search.TypedObject.GetType());
                 return outputObject;
             }
             catch (Exception ex)
             {
-                throw new RecordRetrieveException($"Retrieve of Entity Type Failed: Type {Entity} : Object : " + ObjectToJson(Entity), ex);
+                throw new RecordRetrieveException($"Retrieve of Entity Type Failed: Type {EntityType} : Object : " + ObjectToJson(search.TypedObject), ex);
             }
         }
 

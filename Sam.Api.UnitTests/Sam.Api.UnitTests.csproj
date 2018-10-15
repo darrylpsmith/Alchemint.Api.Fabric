@@ -17,4 +17,10 @@
     <ProjectReference Include="..\Sam.DataModel\Sam.DataModel.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Reference Include="System">
+      <HintPath>System</HintPath>
+    </Reference>
+  </ItemGroup>
+
 </Project>

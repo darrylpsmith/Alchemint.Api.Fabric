@@ -15,14 +15,16 @@ namespace Alchemint.Core
 
         bool DoesEntityWithSameUniqueKeyExist(dynamic Entity);
 
+        bool DoesEntityWithSamePrimaryKeyExist(dynamic Entity);
+
         bool TableExists(string Name);
 
         List<string> BuildFilterList(string propertyNames);
 
         void CreateEntityStorageMechanism(object Entity);
         void CreateEntity(object Entity);
-        void DeleteEntity(object Entity);
-        void UpdateEntity(object Entity);
+        long DeleteEntity(object Entity);
+        long UpdateEntity(object Entity);
         object GetEntity(object Entity, List<string> propertiesToUseInFilter);
         object GetEntities(object Entity, List<string> propertiesToUseInFilter);
 

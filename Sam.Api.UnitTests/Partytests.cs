@@ -12,7 +12,7 @@ namespace Sam.Api.UnitTests
 
 
         FabricJsonAccess _fabricAccess = new FabricJsonAccess(
-            @"https://localhost:44329/api/",
+            StaticFunctions.GetApiUrl(),
             "33c35730-2deb-44ae-9a16-1dec27960052");
 
         //[DataTestMethod]

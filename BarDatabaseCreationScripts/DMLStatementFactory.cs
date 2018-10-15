@@ -10,7 +10,7 @@ namespace Alchemint.Core
     public static class DMLStatementFactory
     {
 
-        internal static SQLDMLStatement GetDMLStatementForGenericEntity(IDatabaseTenant Tenant, object Entity, DMLStatemtType dMLStatemtType, List<string> querProperyPArametersToUse)
+        internal static SQLDMLStatement GetDMLStatementForGenericEntity(IDatabaseTenant Tenant, object Entity, DMLStatemtType dMLStatemtType, List<string> querProperytParametersToUse)
         {
 
             List<object> propValues = GetObjectPropertyValues(Entity);
@@ -18,16 +18,24 @@ namespace Alchemint.Core
 
             List<ISQLDMLStatementVariable> uniqueKeys = null;
 
-            if (dMLStatemtType == DMLStatemtType.SelectAll && querProperyPArametersToUse == null)
+            if (dMLStatemtType == DMLStatemtType.SelectAll && querProperytParametersToUse == null)
             {
                 uniqueKeys = new List<ISQLDMLStatementVariable>
                 {
                     new SQLDMLStatementVariable { Name = "@Tenant", Value = "TR1" }
                 };
             }
-            else if (querProperyPArametersToUse == null)
+            else if (querProperytParametersToUse == null)
             {
-                uniqueKeys = GetUniqueKeyNameValuePairs(Entity, dMLStatemtType == DMLStatemtType.Update || dMLStatemtType == DMLStatemtType.Delete);
+                EntityDescriber ed = new EntityDescriber(Entity);
+                bool primaryKeyIdFieldValueSupplied = ed.PrimaryKeyProvidedOnEntity();
+                
+                if (primaryKeyIdFieldValueSupplied && (dMLStatemtType == DMLStatemtType.Update || dMLStatemtType == DMLStatemtType.Delete))
+                    uniqueKeys = GetUniqueKeyNameValuePairs(Entity, true, false);
+                else if (primaryKeyIdFieldValueSupplied == false && (dMLStatemtType == DMLStatemtType.Update || dMLStatemtType == DMLStatemtType.Delete))
+                    uniqueKeys = GetUniqueKeyNameValuePairs(Entity, false, true);
+                else
+                    uniqueKeys = GetUniqueKeyNameValuePairs(Entity, false, true);
             }
             else
             {
@@ -36,12 +44,12 @@ namespace Alchemint.Core
 
             List<ISQLDMLStatementVariable> uniqueKeysFiltered = new List<ISQLDMLStatementVariable>();
 
-            if (querProperyPArametersToUse != null)
+            if (querProperytParametersToUse != null)
             {
-                querProperyPArametersToUse.Add("Tenant");
+                querProperytParametersToUse.Add("Tenant");
                 foreach (var key in uniqueKeys)
                 {
-                    if (querProperyPArametersToUse.Contains(key.Name.Replace("@","")))
+                    if (querProperytParametersToUse.Contains(key.Name.Replace("@","")))
                     {
                         uniqueKeysFiltered.Add(key);
                     }
@@ -174,9 +182,9 @@ namespace Alchemint.Core
         /// </summary>
         /// <param name="Entity"></param>
         /// <returns></returns>
-        public static string BuildExistenceCheckSql(object Entity)
+        public static string BuildExistenceCheckSql(object Entity, bool UsePrimaryKey)
         {
-            string sql = $"select count(*) from {Entity.GetType().Name} " + BuildUniqueKeyWhereClause(Entity);
+            string sql = $"select count(*) from {Entity.GetType().Name} " + BuildUniqueKeyWhereClause(Entity, UsePrimaryKey);
             return sql;
         }
 
@@ -255,11 +263,19 @@ namespace Alchemint.Core
         }
 
 
-        public static string BuildUniqueKeyWhereClause(object Entity)
+        public static string BuildUniqueKeyWhereClause(object Entity, bool usePrimaryKey)
         {
             EntityDescriber describer = new EntityDescriber(Entity);
             List<EntityProperty> keys = null;
-            keys = describer.UniqueKeys();
+            if (usePrimaryKey)
+            {
+                keys = describer.PrimaryKeys();
+            }
+            else
+            {
+                keys = describer.UniqueKeys();
+            }
+            
 
             string whereClause = "";
             int i = 0;
@@ -281,7 +297,7 @@ namespace Alchemint.Core
         /// </summary>
         /// <param name="Entity"></param>
         /// <returns></returns>
-        public static List<ISQLDMLStatementVariable> GetUniqueKeyNameValuePairs(object Entity, bool includePrimaryKey)
+        public static List<ISQLDMLStatementVariable> GetUniqueKeyNameValuePairs(object Entity, bool includePrimaryKey, bool includeUniqueKey)
         {
             List<ISQLDMLStatementVariable> vars = new List<ISQLDMLStatementVariable>
             {
@@ -289,12 +305,23 @@ namespace Alchemint.Core
             };
 
             EntityDescriber describer = new EntityDescriber(Entity);
-            List<EntityProperty> keys = null;
+            List<EntityProperty> keys = new List<EntityProperty>();
 
             if (includePrimaryKey)
-                keys = describer.PrimaryAndUniqueKeys();
-            else
-                keys = describer.UniqueKeys();
+            {
+                foreach(var x in describer.PrimaryKeys())
+                {
+                    keys.Add(x);
+                }
+            }
+
+            if (includeUniqueKey)
+            {
+                foreach (var x in describer.UniqueKeys())
+                {
+                    keys.Add(x);
+                }
+            }
 
             foreach (var key in keys)
             {

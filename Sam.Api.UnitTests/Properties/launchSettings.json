@@ -1,0 +1,10 @@
+{
+  "profiles": {
+    "Sam.Api.UnitTests": {
+      "commandName": "Project",
+      "environmentVariables": {
+        "TEST_ENVIRONMENT": "Development"
+      }
+    }
+  }
+}

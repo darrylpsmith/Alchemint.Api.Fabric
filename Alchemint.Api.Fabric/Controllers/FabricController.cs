@@ -19,7 +19,7 @@ namespace Sam.Api.Controllers
 
     [Produces("application/json")]
     [Route("api/Fabric")]
-    public class BarFabricController : Controller
+    public class FabricController : Controller
     {
         ILogger Logger { get; } =
             WorkeFunctions.ApplicationLogging.CreateLogger<Controller>();
@@ -28,21 +28,15 @@ namespace Sam.Api.Controllers
         {
             Logger.LogError(ex.Message);
             if (ex.InnerException != null)
+            {
                 Logger.LogError(ex.InnerException.Message);
-        }
-
-
-        // GET: api/User
-        [HttpGet]
-        public IEnumerable<string> Get()
-        {
-            return new string[] { "value1", "value2" };
+            }
         }
 
 
         // GET: api/User/5
         [HttpGet("{ApiKey}/{EntityType}", Name = "GetFabricEntity")]
-        public ActionResult<dynamic> Get(string ApiKey, string EntityType, [FromQuery]string UniqueKeyQuery)
+        public ActionResult<dynamic> Get(string ApiKey, string EntityType, [FromQuery]string Query)
         {
 
             try
@@ -51,9 +45,8 @@ namespace Sam.Api.Controllers
                 WorkeFunctions.BusinessObjectAccess.SqlStatementExecuted += BusinessObjectAccess_sqlStatementExecuted;
 
                 if (!WorkeFunctions.IsValidApiKey(ApiKey)) throw new InvalidApiKeyException();
-
-                EntitySearchObject search = EntityFactory.GetSearchEntity(EntityType, UniqueKeyQuery);
-                object ret = WorkeFunctions.BusinessObjectAccess.GetEntity(search.TypedObject, search.PropertiesToSearch);
+                
+                object ret = WorkeFunctions.BusinessObjectAccess.GetEntity(EntityType, Query);
 
                 if (ret != null)
                 {
@@ -84,14 +77,21 @@ namespace Sam.Api.Controllers
 
         private void BusinessObjectAccess_sqlStatementExecuted(string Sql, List<ISQLDMLStatementVariable> Variables)
         {
-            Logger.LogInformation(Sql);
+            
             if (Variables != null)
-                Logger.LogInformation(Variables.ToString());
+            {
+                Logger.LogInformation($"SQL: {Sql} {Environment.NewLine}PARAMETERS: {Variables[0].Name}={Variables[0].Value}");
+            }
+            else
+            {
+                Logger.LogInformation(Sql);
+            }
+                
             
         }
 
         [HttpGet("{ApiKey}/{EntityType}/All", Name = "GetFabricEntities")]
-        public ActionResult<dynamic> GetAll(string ApiKey, string EntityType, [FromQuery]string UniqueKeyQuery)
+        public ActionResult<dynamic> GetAll(string ApiKey, string EntityType, [FromQuery]string Query)
         {
 
             try
@@ -101,9 +101,7 @@ namespace Sam.Api.Controllers
 
                 if (!WorkeFunctions.IsValidApiKey(ApiKey)) throw new InvalidApiKeyException();
 
-                EntitySearchObject search = EntityFactory.GetSearchEntity(EntityType, UniqueKeyQuery);
-
-                object ret = WorkeFunctions.BusinessObjectAccess.GetEntities(search.TypedObject, search.PropertiesToSearch);
+                object ret = WorkeFunctions.BusinessObjectAccess.GetEntities(EntityType, Query);
 
                 if (ret != null)
                 {
@@ -139,9 +137,25 @@ namespace Sam.Api.Controllers
 
             try
             {
+
                 if (!WorkeFunctions.IsValidApiKey(ApiKey)) throw new InvalidApiKeyException();
 
                 var typedObject = EntityFactory.GetEmptyTypedObect(EntityType);
+
+                EntityDescriber ed = new EntityDescriber(typedObject);
+                var fld = ed.IdField();
+
+                if (fld != null)
+                {
+                    if (fld.Type.Name.ToUpper() == "STRING")
+                    {
+                        if (Entity[ed.IdField().Name].ToString().Trim().Length <= 0)
+                        {
+                            Entity[ed.IdField().Name] = Guid.NewGuid().ToString();
+                        }
+                    }
+                }
+
                 var objectToStore = EntityFactory.CopyPropertiesFromDynamicObjectToTypedObject(Entity, typedObject);
 
                 CreateEntityResult ret = WorkeFunctions.BusinessObjectAccess.StoreEntity(objectToStore);
@@ -152,7 +166,7 @@ namespace Sam.Api.Controllers
                     return CreatedAtAction(nameof(Get), new { id = objectToStore.Id }, objectToStore);
                 }
 
-                else if (ret == CreateEntityResult.EntityRecordExists)
+                else if (ret == CreateEntityResult.EntityWithPrimaryKeyRecordExists || ret == CreateEntityResult.EntityWithUniqueKeyRecordExists)
                 {
                     return Conflict();
                 }
@@ -169,9 +183,6 @@ namespace Sam.Api.Controllers
             catch (Alchemint.Core.Exceptions.RecordCreationException ex)
             {
                 HandleException(ex);
-
-                //System.IO.File.AppendAllText("C:\\temp\\BarApiDebug.Log", ex.ToString());
-                //System.IO.File.AppendAllText("C:\\temp\\BarApiDebug.Log", JsonConvert.SerializeObject(Entity));
                 throw ex;
             }
             catch (Exception ex)
@@ -199,6 +210,10 @@ namespace Sam.Api.Controllers
                 {
                     return CreatedAtAction(nameof(Get), new { id = objectToStore.Id }, objectToStore);
                 }
+                else if (ret == UpdateEntityResult.NoRowsAffected)
+                {
+                    return NotFound();
+                }
                 else
                 {
                     return new UnprocessableEntityObjectResult(objectToStore);
@@ -212,8 +227,6 @@ namespace Sam.Api.Controllers
             catch (Alchemint.Core.Exceptions.RecordUpdateException ex)
             {
                 HandleException(ex);
-                //System.IO.File.AppendAllText("C:\\temp\\BarApiDebug.Log", ex.ToString());
-                //System.IO.File.AppendAllText("C:\\temp\\BarApiDebug.Log", JsonConvert.SerializeObject(Entity));
                 throw ex;
             }
             catch (Exception ex)
@@ -234,18 +247,21 @@ namespace Sam.Api.Controllers
                 if (!WorkeFunctions.IsValidApiKey(ApiKey)) throw new InvalidApiKeyException();
 
                 var typedObject = EntityFactory.GetEmptyTypedObect(EntityType);
-                var objectToStore = EntityFactory.CopyPropertiesFromDynamicObjectToTypedObject(Entity, typedObject);
+                var objectToDelete = EntityFactory.CopyPropertiesFromDynamicObjectToTypedObject(Entity, typedObject);
 
-                DeleteEntityResult ret = WorkeFunctions.BusinessObjectAccess.DeleteEntity(objectToStore);
+                DeleteEntityResult ret = WorkeFunctions.BusinessObjectAccess.DeleteEntity(objectToDelete);
 
                 if (ret == DeleteEntityResult.Success)
                 {
-                    return Ok(); 
+                    return Ok();
                 }
-
+                else if (ret == DeleteEntityResult.NoRowsAffected)
+                {
+                    return NotFound();
+                }
                 else
                 {
-                    return new UnprocessableEntityObjectResult(objectToStore);
+                    return new UnprocessableEntityObjectResult(objectToDelete);
 
                 }
             }
@@ -256,8 +272,6 @@ namespace Sam.Api.Controllers
             catch (Alchemint.Core.Exceptions.RecordDeleteException ex)
             {
                 HandleException(ex);
-                //System.IO.File.AppendAllText("C:\\temp\\BarApiDebug.Log", ex.ToString());
-                //System.IO.File.AppendAllText("C:\\temp\\BarApiDebug.Log", JsonConvert.SerializeObject(Entity));
                 throw ex;
             }
             catch (Exception ex)

@@ -34,7 +34,7 @@ namespace Alchemint.Client.JsonAccess
             EntityDescriber describer = new EntityDescriber(Entity);
             var properties = describer.AllPropertyValues();
 
-            string queryString = "UniqueKeyQuery=";
+            string queryString = "Query=";
             int i = 0;
             bool filterSpecified = false;
             if (propertiesToFilterOn != null)

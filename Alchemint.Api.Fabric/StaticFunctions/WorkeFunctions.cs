@@ -75,9 +75,7 @@ namespace Sam.Api
         public static bool IsValidApiKey(string ApiKey)
         {
             return true;
-
-            EntitySearchObject search = EntityFactory.GetSearchEntity("ApiKey", "ApiKeyValue=" + ApiKey);
-            object ret = WorkeFunctions.BusinessObjectAccess.GetEntity(search.TypedObject, search.PropertiesToSearch);
+            object ret = WorkeFunctions.BusinessObjectAccess.GetEntity("ApiKey", ApiKey);
 
             try
             {

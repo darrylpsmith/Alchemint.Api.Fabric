@@ -1,0 +1,27 @@
+{
+  "Logging": {
+    "IncludeScopes": false,
+    "Debug": {
+      "LogLevel": {
+        "Default": "Warning"
+      }
+    },
+    "Console": {
+      "LogLevel": {
+        "Default": "Warning"
+      }
+    }
+  },
+  "Connection": {
+    "ConnStringSQLite": "@APPDATA@/Sam.Api/",
+    "ConnStringAzure": "",
+    "ConnStringSQLExpress": "",
+    "DBType": ""
+    // DBType can be any of SQLITE, SQLSERVER, SQLEXPRESS, MYSQL, POSTGRESSQL
+  },
+
+  "DatabaseTenant": {
+    "Code": "TR1",
+    "Name": "Web API"
+  }
+}

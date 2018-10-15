@@ -11,6 +11,7 @@ using System.Text.RegularExpressions;
 
 namespace Alchemint.Core
 {
+
     public class DatabaseAccess : IDatabaseAccess
     {
         IExecuteDML _dbaccess;
@@ -45,79 +46,6 @@ namespace Alchemint.Core
             return propertiesToFilterOn;
         }
 
-
-        //public void CreateUser(string Id, string UserName, string Password, string Email, string Telephone)
-        //{
-        //    var Statement = BarDMLStatementFactory.GetDMLStatement(_tenant, BarDMLScript.eCreateUser, new object[] { Id, UserName, Password, Email, Telephone });
-        //    ((IExecuteDML)_dbaccess).Execute(Statement);
-        //}
-
-        //public void DeleteUser(string Id)
-        //{
-        //    var Statement = BarDMLStatementFactory.GetDMLStatement(_tenant, BarDMLScript.eDeletUser, new object[] { Id });
-        //    ((IExecuteDML)_dbaccess).Execute(Statement);
-        //}
-
-        //public object GetUser(string Id)
-        //{
-        //    var Statement = BarDMLStatementFactory.GetDMLStatement(_tenant, BarDMLScript.eGetUser, new object[] { Id });
-        //    return ((IExecuteDML)_dbaccess).Execute(Statement);
-        //}
-
-        //public object GetUser(string UserName, string Password)
-        //{
-        //    var Statement = BarDMLStatementFactory.GetDMLStatement(_tenant, BarDMLScript.eGetUserByLoginDetails, new object[] { UserName, Password });
-        //    return ((IExecuteDML)_dbaccess).Execute(Statement);
-        //}
-
-        //public object GetUsers()
-        //{
-        //    var Statement = BarDMLStatementFactory.GetDMLStatement(_tenant, BarDMLScript.eGetAllUsers, new object[] { });
-        //    return ((IExecuteDML)_dbaccess).Execute(Statement);
-        //}
-
-        //public void UpdateUser(string Id, string UserName, string Password, string Email, string Telephone)
-        //{
-        //    var Statement = BarDMLStatementFactory.GetDMLStatement(_tenant, BarDMLScript.eUpdateUser, new object[] { Id, UserName, Password, Email, Telephone });
-        //    ((IExecuteDML)_dbaccess).Execute(Statement);
-
-        //}
-        //public void CreateInstitution(string Id, string Name, string Password, string Email, string Telephone)
-        //{
-        //    var Statement = BarDMLStatementFactory.GetDMLStatement(_tenant, BarDMLScript.eCreateInstitution, new object[] { Id, Name, Password, Email, Telephone });
-        //    ((IExecuteDML)_dbaccess).Execute(Statement);
-        //}
-
-        //public void DeleteInstitution(string Id)
-        //{
-        //    var Statement = BarDMLStatementFactory.GetDMLStatement(_tenant, BarDMLScript.eDeleteInstitution, new object[] { Id });
-        //    ((IExecuteDML)_dbaccess).Execute(Statement);
-        //}
-
-        //public void UpdateInstitution(string Id, string Name, string Password, string Email, string Telephone)
-        //{
-        //    var Statement = BarDMLStatementFactory.GetDMLStatement(_tenant, BarDMLScript.eUpdateInstitution, new object[] { Id, Name, Password, Email, Telephone });
-        //    ((IExecuteDML)_dbaccess).Execute(Statement);
-        //}
-
-        //public object GetInstitution(string Id)
-        //{
-        //    var Statement = BarDMLStatementFactory.GetDMLStatement(_tenant, BarDMLScript.eGetInstitution, new object[] { Id });
-        //    return ((IExecuteDML)_dbaccess).Execute(Statement);
-        //}
-
-        //public object GetInstitution(string Name, string Password)
-        //{
-        //    var Statement = BarDMLStatementFactory.GetDMLStatement(_tenant, BarDMLScript.eGetInstitutionByLoginDetails, new object[] { Name, Password });
-        //    return ((IExecuteDML)_dbaccess).Execute(Statement);
-        //}
-
-        //public object GetInstitutions()
-        //{
-        //    var Statement = BarDMLStatementFactory.GetDMLStatement(_tenant, BarDMLScript.eGetAllInstitutions, new object[] { });
-        //    return ((IExecuteDML)_dbaccess).Execute(Statement);
-        //}
-
         public void CreateEntity(object Entity)
         {
             var Statement = DMLStatementFactory.GetDMLStatementForGenericEntity(_tenant, Entity, DMLStatemtType.Insert, null);
@@ -141,24 +69,33 @@ namespace Alchemint.Core
 
         }
 
-        public void DeleteEntity(object Entity)
+        public long DeleteEntity(object Entity)
         {
-            var Statement = DMLStatementFactory.GetDMLStatementForGenericEntity(_tenant, Entity, DMLStatemtType.Delete, null);
-            ((IExecuteDML)_dbaccess).Execute(Statement);
 
+            EntityDescriber ed = new EntityDescriber(Entity);
+            if (ed.UniqueKeyProvidedOnEntity() == false && ed.PrimaryKeyProvidedOnEntity() == false)
+            {
+                throw new Exception("Neither a Primary Key nor UniqueKey was provided for the object.");
+            }
+
+            var Statement = DMLStatementFactory.GetDMLStatementForGenericEntity(_tenant, Entity, DMLStatemtType.Delete, null);
+            var ret = (Int32)((IExecuteDML)_dbaccess).Execute(Statement);
             SqlStatementExecuted?.Invoke(Statement.PreparedStatement, Statement.Variables);
+            return ret;
         }
 
-        public void UpdateEntity(object Entity)
+        public long UpdateEntity(object Entity)
         {
+            EntityDescriber ed = new EntityDescriber(Entity);
+            if (ed.UniqueKeyProvidedOnEntity() == false && ed.PrimaryKeyProvidedOnEntity() == false)
+            {
+                throw new Exception("Neither a Primary Key nor UniqueKey was provided for the object.");
+            }
+
             var Statement = DMLStatementFactory.GetDMLStatementForGenericEntity(_tenant, Entity, DMLStatemtType.Update, null);
             var ret = (Int32) ((IExecuteDML)_dbaccess).Execute(Statement);
-            if (ret <= 0)
-                throw new Exception("No records were updated");
-
             SqlStatementExecuted?.Invoke(Statement.PreparedStatement, Statement.Variables);
-            //this.sqlStatementExecuted(Statement.PreparedStatement);
-
+            return ret;
         }
 
         public object GetEntity(object Entity, List<string> propertiesToUseInFilter)
@@ -177,93 +114,6 @@ namespace Alchemint.Core
 
         }
 
-        
-
-        //public void CreateToken(string Id, DateTime IssueTime, string OriginatorWalletAddress, string CurrentWallet, Int64 TokenType)
-        //{
-        //    var Statement = BarDMLStatementFactory.GetDMLStatement(_tenant, BarDMLScript.eCreateToken, new object[] { Id, IssueTime, OriginatorWalletAddress, CurrentWallet, TokenType });
-        //    ((IExecuteDML)_dbaccess).Execute(Statement);
-        //}
-
-        //public void DeleteToken(string Id)
-        //{
-        //    var Statement = BarDMLStatementFactory.GetDMLStatement(_tenant, BarDMLScript.eDeleteToken, new object[] { Id });
-        //    ((IExecuteDML)_dbaccess).Execute(Statement);
-        //}
-
-        //public void UpdateToken(string Id, DateTime IssueTime, string OriginatorWalletAddress, string CurrentWallet, Int64 TokenType)
-        //{
-        //    var Statement = BarDMLStatementFactory.GetDMLStatement(_tenant, BarDMLScript.eUpdateToken, new object[] { Id, IssueTime, OriginatorWalletAddress, CurrentWallet, TokenType });
-        //    ((IExecuteDML)_dbaccess).Execute(Statement);
-        //}
-
-        //public object GetToken(string Id)
-        //{
-        //    var Statement = BarDMLStatementFactory.GetDMLStatement(_tenant, BarDMLScript.eGetToken, new object[] { Id });
-        //    return ((IExecuteDML)_dbaccess).Execute(Statement);
-        //}
-
-        //public void CreateWallet(string OwnerId, DateTime CreationTime, string ReceiveAddress, string PublicKey, string PrivateKey)
-        //{
-        //    var Statement = BarDMLStatementFactory.GetDMLStatement(_tenant, BarDMLScript.eCreateWallet, new object[] { OwnerId, CreationTime, ReceiveAddress, PublicKey, PrivateKey });
-        //    ((IExecuteDML)_dbaccess).Execute(Statement);
-        //}
-
-        //public void DeleteWallet(string OwnerId)
-        //{
-        //    var Statement = BarDMLStatementFactory.GetDMLStatement(_tenant, BarDMLScript.eDeleteWallet, new object[] { OwnerId });
-        //    ((IExecuteDML)_dbaccess).Execute(Statement);
-        //}
-
-        //public void UpdateWallet(string OwnerId, DateTime CreationTime, string ReceiveAddress, string PublicKey, string PrivateKey)
-        //{
-        //    var Statement = BarDMLStatementFactory.GetDMLStatement(_tenant, BarDMLScript.eUpdateWallet, new object[] { OwnerId, CreationTime, ReceiveAddress, PublicKey, PrivateKey });
-        //    ((IExecuteDML)_dbaccess).Execute(Statement);
-        //}
-
-        //public object GetWallet(string OwnerId)
-        //{
-        //    var Statement = BarDMLStatementFactory.GetDMLStatement(_tenant, BarDMLScript.eGetWallet, new object[] { OwnerId });
-        //    return ((IExecuteDML)_dbaccess).Execute(Statement);
-        //}
-
-        //public void CreateTransaction(string SourceWalletAddress, string TargetWalletAddress, float TokenAmount, DateTime TxDate)
-        //{
-        //    var Statement = BarDMLStatementFactory.GetDMLStatement(_tenant, BarDMLScript.eCreateTransaction, new object[] { SourceWalletAddress, TargetWalletAddress, TokenAmount, TxDate });
-        //    ((IExecuteDML)_dbaccess).Execute(Statement);
-        //}
-
-        //public void DeleteTransaction(string SourceWalletAddress)
-        //{
-        //    var Statement = BarDMLStatementFactory.GetDMLStatement(_tenant, BarDMLScript.eDeleteTransaction, new object[] { SourceWalletAddress });
-        //    ((IExecuteDML)_dbaccess).Execute(Statement);
-        //}
-
-        //public void UpdateTransaction(string SourceWalletAddress, string TargetWalletAddress, float TokenAmount, DateTime TxDate)
-        //{
-        //    var Statement = BarDMLStatementFactory.GetDMLStatement(_tenant, BarDMLScript.eUpdateTransaction, new object[] { SourceWalletAddress, TargetWalletAddress, TokenAmount, TxDate });
-        //    ((IExecuteDML)_dbaccess).Execute(Statement);
-        //}
-
-        //public object GetTransaction(string SourceWalletAddress)
-        //{
-        //    var Statement = BarDMLStatementFactory.GetDMLStatement(_tenant, BarDMLScript.eGetTransaction, new object[] { SourceWalletAddress });
-        //    return ((IExecuteDML)_dbaccess).Execute(Statement);
-        //}
-
-        //public void SendTokens(int Amount, string FromOwner, string ToOwner, string Message)
-        //{
-        //    var Statement = BarDMLStatementFactory.GetDMLStatement(_tenant, BarDMLScript.eSendTokens, new object[] { Amount, FromOwner, ToOwner });
-        //    ((IExecuteDML)_dbaccess).Execute(Statement);
-        //}
-
-        //public object GetTokenBalance(string OwnerId)
-        //{
-        //    var Statement = BarDMLStatementFactory.GetDMLStatement(_tenant, BarDMLScript.eGetBalance, new object[] { OwnerId });
-        //    return ((IExecuteDML)_dbaccess).Execute(Statement);
-
-        //}
-
         public bool TableExists(string Name)
         {
             return _dbaccess.TableExists(Name);
@@ -271,18 +121,51 @@ namespace Alchemint.Core
 
         public bool DoesEntityWithSameUniqueKeyExist(object Entity)
         {
-            var sql = DMLStatementFactory.BuildExistenceCheckSql(Entity);
-            List<ISQLDMLStatementVariable> vars = DMLStatementFactory.GetUniqueKeyNameValuePairs(Entity, false);
-            SQLDMLStatement dml = new SQLDMLStatement
+            EntityDescriber ed = new EntityDescriber(Entity);
+            if (ed.UniqueKeys().Count > 0)
             {
-                PreparedStatement = sql,
-                StatemtType = DMLStatemtType.Select,
-                Variables = vars
-            };
+                var sql = DMLStatementFactory.BuildExistenceCheckSql(Entity, false);
+                List<ISQLDMLStatementVariable> vars = DMLStatementFactory.GetUniqueKeyNameValuePairs(Entity, false, true);
+                SQLDMLStatement dml = new SQLDMLStatement
+                {
+                    PreparedStatement = sql,
+                    StatemtType = DMLStatemtType.Select,
+                    Variables = vars
+                };
 
-            var results = (DataTable)((IExecuteDML)_dbaccess).Execute(dml);
-            var count = Convert.ToInt32(results.Rows[0].ItemArray[0]);
-            return count > 0;
+                var results = (DataTable)((IExecuteDML)_dbaccess).Execute(dml);
+                var count = Convert.ToInt32(results.Rows[0].ItemArray[0]);
+                return count > 0;
+            }
+            else
+            {
+                return false;
+            }
+        }
+
+
+        public bool DoesEntityWithSamePrimaryKeyExist(object Entity)
+        {
+            EntityDescriber ed = new EntityDescriber(Entity);
+            if (ed.PrimaryKeys().Count > 0)
+            {
+                var sql = DMLStatementFactory.BuildExistenceCheckSql(Entity, true);
+                List<ISQLDMLStatementVariable> vars = DMLStatementFactory.GetUniqueKeyNameValuePairs(Entity, true, false);
+                SQLDMLStatement dml = new SQLDMLStatement
+                {
+                    PreparedStatement = sql,
+                    StatemtType = DMLStatemtType.Select,
+                    Variables = vars
+                };
+
+                var results = (DataTable)((IExecuteDML)_dbaccess).Execute(dml);
+                var count = Convert.ToInt32(results.Rows[0].ItemArray[0]);
+                return count > 0;
+            }
+            else
+            {
+                return false;
+            }
         }
     }
 }

@@ -21,6 +21,74 @@ namespace Alchemint.Core
                 );
         }
 
+        public bool PrimaryKeyProvidedOnEntity ()
+        {
+            bool primaryKeyIdFieldValueSupplied = false;
+            if (IdField() != null)
+            {
+                if (IdField().Value != null)
+                {
+                    primaryKeyIdFieldValueSupplied = true;
+                }
+            }
+            return primaryKeyIdFieldValueSupplied;
+        }
+
+        public bool UniqueKeyProvidedOnEntity()
+        {
+            bool uniqueKeyIdFieldValueSupplied = false;
+            if (UniqueKeyFields() != null)
+            {
+                foreach(var key in UniqueKeyFields())
+                {
+                    if (key.Value == null)
+                    {
+                        uniqueKeyIdFieldValueSupplied = false;
+                        break;
+                    }
+                }
+
+            }
+            return uniqueKeyIdFieldValueSupplied;
+        }
+
+        public EntityProperty IdField()
+        {
+            var props =  GetPropertiesOfAttributeType(
+                new Type[] { typeof(PrimaryKeyAttribute) }
+                );
+            if (props.Count == 0)
+            {
+                return null;
+            }
+            else if (props.Count == 1)
+            {
+                return props.First();
+            }
+            else
+            {
+                throw new Exception("CODE LOGIC EXCEPTION: More than one Primary Key field specified");
+            }
+        }
+
+        public List<EntityProperty> UniqueKeyFields()
+        {
+            var props = GetPropertiesOfAttributeType(
+                new Type[] { typeof(UniqueKeyAttribute) }
+                );
+            if (props.Count == 0)
+            {
+                return null;
+            }
+            else if (props.Count == 1)
+            {
+                return props;
+            }
+            else
+            {
+                throw new Exception("CODE LOGIC EXCEPTION: More than one Primary Key field specified");
+            }
+        }
         public List<EntityProperty> UniqueKeys()
         {
             return GetPropertiesOfAttributeType(

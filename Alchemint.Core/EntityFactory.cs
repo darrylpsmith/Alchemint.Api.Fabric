@@ -8,28 +8,26 @@ namespace Alchemint.Core
 {
     public class EntityFactory
     {
+        private static string _dataModelClassLibrary = "Sam.DataModel.dll";
+        private static string _dataModelNameSpace = "Sam.DataModel";
+
         public static I CreateInstance<I>(string EntityType) where I : class
         {
-
-            //string _dataModelClassLibrary = "BarClasses.dll";
-            //string _dataModelNameSpace = "Alchemint.Bar";
-
-            string _dataModelClassLibrary = "Sam.DataModel.dll";
-            string _dataModelNameSpace = "Sam.DataModel";
-
-            string assemblyPath = GetApplicationRoot() + "/" + _dataModelClassLibrary;
-            Assembly assembly;
-            assembly = Assembly.LoadFrom(assemblyPath);
+            Assembly assembly = GetAssembly(GetAssemblyFilePath());
             Type type = assembly.GetType($"{_dataModelNameSpace}.{EntityType}");
             return Activator.CreateInstance(type) as I;
+        }
 
 
-
-            //string assemblyPath = GetApplicationRoot() + "/BarClasses.dll";
-            //Assembly assembly;
-            //assembly = Assembly.LoadFrom(assemblyPath);
-            //Type type = assembly.GetType($"Alchemint.Bar.{EntityType}");
-            //return Activator.CreateInstance(type) as I;
+        private static string GetAssemblyFilePath ()
+        {
+             return GetApplicationRoot() + "/" + _dataModelClassLibrary;
+        }
+        private static Assembly GetAssembly(string dllName)
+        {
+            Assembly assembly;
+            assembly = Assembly.LoadFrom(dllName);
+            return assembly;
         }
 
         public static object GetEmptyTypedObect(string EntityType)
@@ -37,6 +35,14 @@ namespace Alchemint.Core
             object reflectedEntityObject = CreateInstance<object>(EntityType);
             return reflectedEntityObject;
         }
+
+        public static List<string> GetClassNames()
+        {
+            return (from t in GetAssembly(GetAssemblyFilePath()).GetTypes()
+                    where t.GetConstructor(Type.EmptyTypes) != null
+                    select t.Name).ToList();
+        }
+
 
 
         public static string GetApplicationRoot()
@@ -97,20 +103,22 @@ namespace Alchemint.Core
                 object pValue = DynamicObject[pName].Value;
 
 
-
-                if (pValue.GetType() != p.PropertyType)
+                if (pValue != null)
                 {
+                    if (pValue.GetType() != p.PropertyType)
+                    {
 
-                    if (pValue.GetType().Name.StartsWith("Int"))
-                    {
-                        pValue = Convert.ToInt32(pValue);
+                        if (pValue.GetType().Name.StartsWith("Int"))
+                        {
+                            pValue = Convert.ToInt32(pValue);
+                        }
+                        else
+                        {
+                            throw new Exception($"Property types for property {pName} of object type {TypedObject.GetType().Name} do not match: {pValue.GetType()} ==> {p.PropertyType}");
+                        }
+                        //{ System.Int64}
+                        //{ System.Int32}
                     }
-                    else
-                    {
-                        throw new Exception($"Property types for property {pName} of object type {TypedObject.GetType().Name} do not match: {pValue.GetType()} ==> {p.PropertyType}");
-                    }
-                    //{ System.Int64}
-                    //{ System.Int32}
                 }
 
                 p.SetValue(TypedObject, pValue);

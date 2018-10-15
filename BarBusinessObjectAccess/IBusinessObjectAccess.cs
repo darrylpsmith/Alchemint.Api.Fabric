@@ -8,19 +8,23 @@ namespace Alchemint.Core
     {
         Success,
         EntityStorageStructureMissing,
-        EntityRecordExists,
+        EntityWithUniqueKeyRecordExists,
+        EntityWithPrimaryKeyRecordExists,
+
     }
 
     public enum DeleteEntityResult
     {
         Success,
-        EntityStorageStructureMissing
+        EntityStorageStructureMissing,
+        NoRowsAffected
     }
 
     public enum UpdateEntityResult
     {
         Success,
-        EntityStorageStructureMissing
+        EntityStorageStructureMissing, 
+        NoRowsAffected
     }
     public enum RetrieveEntityResult
     {
@@ -56,9 +60,10 @@ namespace Alchemint.Core
 
         UpdateEntityResult UpdateEntity(dynamic Entity);
 
-        object GetEntity(object Entity, List<string> propertiesToUseInFilter);
+        object GetEntity(string EntityType, string Query);
 
-        List<object> GetEntities(object Entity, List<string> propertiesToUseInFilter);
+        List<object> GetEntities(string EntityType, string Query);
+        //List<object> GetEntities(string EntityType, string Query);
 
         //void CreateToken(string Id, DateTime IssueTime, string OriginatorWalletAddress, string CurrentWallet, Int64 TokenType);
         //void DeleteToken(string Id);
