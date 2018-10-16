@@ -5,6 +5,7 @@ using Alchemint.Core;
 
 namespace Sam.DataModel
 {
+    [GeneratedController("api/legalcontractsection")]
     public class LegalContractSection
     {
         public LegalContractSection()

@@ -20,16 +20,16 @@ namespace Sam.Api.Controllers
         FabricController _fab = new FabricController();
 
         [HttpGet("athlete/{ApiKey}", Name = "GetAthlete")]
-        public ActionResult<dynamic> Get(string ApiKey, [FromQuery]string UniqueKeyQuery)
+        public ActionResult<dynamic> Get(string ApiKey, [FromQuery]string Query)
         {
-            return _fab.Get(ApiKey, "Party", UniqueKeyQuery);
+            return _fab.Get(ApiKey, "Party", Query);
         }
 
 
         [HttpGet("contract/{ApiKey}", Name = "GetContract")]
-        public ActionResult<dynamic> GetContract(string ApiKey, [FromQuery]string UniqueKeyQuery)
+        public ActionResult<dynamic> GetContract(string ApiKey, [FromQuery]string Query)
         {
-            return _fab.Get(ApiKey, "LegalContract", UniqueKeyQuery);
+            return _fab.Get(ApiKey, "LegalContract", Query);
         }
 
     }

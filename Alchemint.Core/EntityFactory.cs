@@ -19,11 +19,11 @@ namespace Alchemint.Core
         }
 
 
-        private static string GetAssemblyFilePath ()
+        public static string GetAssemblyFilePath ()
         {
              return GetApplicationRoot() + "/" + _dataModelClassLibrary;
         }
-        private static Assembly GetAssembly(string dllName)
+        public static Assembly GetAssembly(string dllName)
         {
             Assembly assembly;
             assembly = Assembly.LoadFrom(dllName);
@@ -93,6 +93,33 @@ namespace Alchemint.Core
 
         }
 
+        public static void SetPropertyByName (object Entity, string PropertyName, object Value)
+        {
+            var properties = Entity.GetType().GetProperties();
+            foreach (var p in properties)
+            {
+                if (p.Name == PropertyName)
+                {
+                    p.SetValue(Entity, Value);
+                }
+            }
+        }
+        public static object GetPropertyByName(object Entity, string PropertyName)
+        {
+            var properties = Entity.GetType().GetProperties();
+            object ret = null;
+
+            foreach (var p in properties)
+            {
+                if (p.Name == PropertyName)
+                {
+                    ret = p.GetValue(Entity); 
+                }
+            }
+
+            return ret;
+        }
+
 
         public static object CopyPropertiesFromDynamicObjectToTypedObject(dynamic DynamicObject, object TypedObject)
         {
@@ -100,28 +127,33 @@ namespace Alchemint.Core
             foreach (var p in properties)
             {
                 string pName = p.Name;
-                object pValue = DynamicObject[pName].Value;
 
-
-                if (pValue != null)
+                if (DynamicObject[pName] != null)
                 {
-                    if (pValue.GetType() != p.PropertyType)
+                    object pValue = DynamicObject[pName].Value;
+
+
+                    if (pValue != null)
                     {
+                        if (pValue.GetType() != p.PropertyType)
+                        {
 
-                        if (pValue.GetType().Name.StartsWith("Int"))
-                        {
-                            pValue = Convert.ToInt32(pValue);
+                            if (pValue.GetType().Name.StartsWith("Int"))
+                            {
+                                pValue = Convert.ToInt32(pValue);
+                            }
+                            else
+                            {
+                                throw new Exception($"Property types for property {pName} of object type {TypedObject.GetType().Name} do not match: {pValue.GetType()} ==> {p.PropertyType}");
+                            }
+                            //{ System.Int64}
+                            //{ System.Int32}
                         }
-                        else
-                        {
-                            throw new Exception($"Property types for property {pName} of object type {TypedObject.GetType().Name} do not match: {pValue.GetType()} ==> {p.PropertyType}");
-                        }
-                        //{ System.Int64}
-                        //{ System.Int32}
                     }
-                }
 
-                p.SetValue(TypedObject, pValue);
+                    p.SetValue(TypedObject, pValue);
+
+                }
             }
             return TypedObject;
         }

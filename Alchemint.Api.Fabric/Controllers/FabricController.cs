@@ -149,14 +149,47 @@ namespace Sam.Api.Controllers
                 {
                     if (fld.Type.Name.ToUpper() == "STRING")
                     {
-                        if (Entity[ed.IdField().Name].ToString().Trim().Length <= 0)
+
+                        if (Entity.GetType().Name == "JObject")
                         {
-                            Entity[ed.IdField().Name] = Guid.NewGuid().ToString();
+                            if (Entity[fld.Name] == null)
+                            {
+                                Entity[fld.Name] = Guid.NewGuid().ToString();
+                            }
+                            else if (Entity[fld.Name].ToString().Trim().Length <= 0)
+                            {
+                                Entity[fld.Name] = Guid.NewGuid().ToString();
+                            }
                         }
+                        else
+                        {
+                            var idValue = EntityFactory.GetPropertyByName(Entity, fld.Name);
+
+                            if (idValue == null)
+                            {
+                                EntityFactory.SetPropertyByName(Entity, fld.Name, Guid.NewGuid().ToString());
+                            }
+                            else if (idValue.ToString().Trim().Length <= 0)
+                            {
+                                EntityFactory.SetPropertyByName(Entity, fld.Name, Guid.NewGuid().ToString());
+                            }
+
+                        }
+
+
                     }
                 }
 
-                var objectToStore = EntityFactory.CopyPropertiesFromDynamicObjectToTypedObject(Entity, typedObject);
+                dynamic objectToStore;
+                if (Entity.GetType().Name == "JObject")
+                {
+                    objectToStore = EntityFactory.CopyPropertiesFromDynamicObjectToTypedObject(Entity, typedObject);
+                }
+                else
+                {
+                    objectToStore = Entity;
+                }
+                    
 
                 CreateEntityResult ret = WorkeFunctions.BusinessObjectAccess.StoreEntity(objectToStore);
 
@@ -201,14 +234,32 @@ namespace Sam.Api.Controllers
             {
                 if (!WorkeFunctions.IsValidApiKey(ApiKey)) throw new InvalidApiKeyException();
 
-                var typedObject = EntityFactory.GetEmptyTypedObect(EntityType);
-                var objectToStore = EntityFactory.CopyPropertiesFromDynamicObjectToTypedObject(Entity, typedObject);
+                object objectToStore;
+                if (Entity.GetType().Name == "JObject")
+                {
+                    var typedObject = EntityFactory.GetEmptyTypedObect(EntityType);
+                    objectToStore = EntityFactory.CopyPropertiesFromDynamicObjectToTypedObject(Entity, typedObject);
+                }
+                else
+                {
+                    objectToStore = Entity;
+                }
 
                 UpdateEntityResult ret = WorkeFunctions.BusinessObjectAccess.UpdateEntity(objectToStore);
 
                 if (ret == UpdateEntityResult.Success)
                 {
-                    return CreatedAtAction(nameof(Get), new { id = objectToStore.Id }, objectToStore);
+                    EntityDescriber edd = new EntityDescriber(objectToStore);
+
+                    if (edd.IdField() != null)
+                    {
+                        return  CreatedAtAction(nameof(Get), new { id = EntityFactory.GetPropertyByName(objectToStore, edd.IdField().Name) }, objectToStore);
+                    }
+                    else
+                    {
+                        return CreatedAtAction(nameof(Get), new {  }, objectToStore);
+                    }
+                    
                 }
                 else if (ret == UpdateEntityResult.NoRowsAffected)
                 {
@@ -246,8 +297,16 @@ namespace Sam.Api.Controllers
             {
                 if (!WorkeFunctions.IsValidApiKey(ApiKey)) throw new InvalidApiKeyException();
 
-                var typedObject = EntityFactory.GetEmptyTypedObect(EntityType);
-                var objectToDelete = EntityFactory.CopyPropertiesFromDynamicObjectToTypedObject(Entity, typedObject);
+                object objectToDelete;
+                if (Entity.GetType().Name == "JObject")
+                {
+                    var typedObject = EntityFactory.GetEmptyTypedObect(EntityType);
+                    objectToDelete = EntityFactory.CopyPropertiesFromDynamicObjectToTypedObject(Entity, typedObject);
+                }
+                else
+                {
+                    objectToDelete = Entity;
+                }
 
                 DeleteEntityResult ret = WorkeFunctions.BusinessObjectAccess.DeleteEntity(objectToDelete);
 

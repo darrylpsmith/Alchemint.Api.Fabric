@@ -1,8 +1,23 @@
 version: '3.4'
 
 services:
+
+  samdb:
+    image: mysql:5.7
+    environment:
+      MYSQL_ROOT_PASSWORD: rootpwd
+      MYSQL_DATABASE: sam
+      MYSQL_USER: root
+      MYSQL_PASSWORD: pwd
+    volumes:
+      - ./dbdata/:/var/lib/mysql
+    restart: always
+
   alchemint.api.fabric:
     image: ${DOCKER_REGISTRY}alchemintapifabric
     build:
       context: .
       dockerfile: Alchemint.Api.Fabric/Dockerfile
+
+volumes:
+  dbdata:
